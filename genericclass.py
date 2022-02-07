@@ -1,11 +1,12 @@
 import functions,random
 
 class Generic:
-    def __init__(self,name,moveset,temporarystats,subjects,health,maxhealth,attack,defense,speed,intelligence,charisma,
+    def __init__(self,name,moveset,temporarystats,passiveeffects,subjects,health,maxhealth,attack,defense,speed,intelligence,charisma,
                 alcoholtolerance,weedtolerance,critical,guardbreak):
         self.name = name
         self.moveset = moveset
         self.temporarystats = temporarystats
+        self.passiveffects = passiveeffects
         self.subjects = subjects
         self.health = health
         self.maxhealth = maxhealth
@@ -43,9 +44,8 @@ class Generic:
             options[choice](self,enemy)
         elif choice == "2" or choice == "3" or choice == "4":
             options[choice](self)
-        elif choice == "5":
-            options[choice](self,self.subjects)
-        elif choice == "6" or choice == "10":
-            options[choice](enemy)
         else:
-            options[choice]()
+            options[choice](self,self.subjects)
+
+    def personalchecks(self,enemy):
+        None

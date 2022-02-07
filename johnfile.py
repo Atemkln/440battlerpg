@@ -1,11 +1,12 @@
-import engine,random,functions,genericclass,time
+import engine,random,functions
 
 class John:
-    def __init__(self,name,moveset,temporarystats,subjects,health,maxhealth,attack,defense,speed,intelligence,charisma,
-                alcoholtolerance,weedtolerance,critical,guardbreak,allisongreen,money):
+    def __init__(self,name,moveset,temporarystats,passiveeffects,subjects,health,maxhealth,attack,defense,speed,intelligence,charisma,
+                alcoholtolerance,weedtolerance,critical,guardbreak,allisongreen,money,tipstatus):
         self.name = name
         self.moveset = moveset
         self.temporarystats = temporarystats
+        self.passiveeffects = passiveeffects
         self.subjects = subjects
         self.health = health
         self.maxhealth = maxhealth
@@ -20,6 +21,7 @@ class John:
         self.guardbreak = guardbreak
         self.allisongreen = allisongreen
         self.money = money
+        self.tipstatus = tipstatus
 
     def combatmenu(self):
         print("-----------------------------------------------------------------")
@@ -27,16 +29,39 @@ class John:
         print("")
         print(f"HEALTH: {self.health}                                   1. ATTACK")
         print(f"ATTACK: {self.attack}                                    2. DEFEND")
-        print(f"DEFENSE: {self.defense}                                    3. CHUG BEER")
-        print(f"SPEED: {self.speed}                                      4. SMOKE WEED")
-        print(f"INTELLGENCE: {self.intelligence}                                5. STUDY")
-        print(f"CHARISMA: {self.charisma}                                   6. {self.moveset[0]}")                                 
-        print(f"ALCOHOL TOLERANCE: {self.alcoholtolerance}                          7. {self.moveset[1]}")
+        print(f"DEFENSE: {self.defense}                                   3. CHUG BEER")
+        print(f"SPEED: {self.speed}                                    4. SMOKE WEED")
+        print(f"INTELLGENCE: {self.intelligence}                               5. STUDY")
+        print(f"CHARISMA: {self.charisma}                                  6. {self.moveset[0]}")                                 
+        print(f"ALCOHOL TOLERANCE: {self.alcoholtolerance}                        7. {self.moveset[1]}")
         print(f"WEED TOLERANCE: {self.weedtolerance}                            8. {self.moveset[2]}")
-        print(f"                                              9. {self.moveset[3]}")
-        print(f"                                              10. {self.moveset[4]}") 
+        print(f"MONEY: {self.money}                                   9. {self.moveset[3]}")
+        print(f"                                             10. {self.moveset[4]}") 
         print("")
 
+    def movechoice(self,enemy):
+            options = {
+                "1":functions.basicattack,
+                "2":functions.basicdefend,
+                "3":functions.chugbeer,
+                "4":functions.smokeweed,
+                "5":functions.study,
+                "6":self.customerservice,
+                "7":self.gourmetmeal,
+                "8":self.greygoose,
+                "9":self.ohmygodjohn,
+                "10":self.extravaganttip
+                }
+            choice = engine.display("What will you do?: ",get=2,amount=len(self.moveset))
+            if choice == "1":
+                options[choice](self,enemy)
+            elif choice == "2" or choice == "3" or choice == "4":
+                options[choice](self)
+            elif choice == "5":
+                options[choice](self,self.subjects)
+            else: 
+                options[choice](enemy)
+           
     def customerservice(self,enemy):
         engine.display("...*ring*...*ring*...")
         engine.pause()
@@ -48,10 +73,7 @@ class John:
             engine.display(f"{self.name} STUNS {enemy.name} for 1 turn!")
             engine.display(f"But {self.name}'s CHARISMA decreases by 2 due to self reflection...")
             functions.statdecrease(self,"CHARISMA",2)
-            self.temporarystats["GUARD BREAK"] = [-self.guardbreak,1]
-            self.combatmenu()
-            #self.movechoice(self,enemy)
-            functions.temporarycheck()
+            functions.singleturn(self,enemy)
         else:
             engine.display(f"{enemy.name} is shackled by corporate policy!")
             engine.display("They are unable to accomodate him! :(")
@@ -67,7 +89,7 @@ class John:
             functions.statincrease(self,"ATTACK",20)
             functions.statdecrease(self,"DEFENSE",20)
             self.temporarystats["ATTACK"] = [20,2]
-            self.temporarystats["DEFENSE"] = [20,2]
+            self.temporarystats["DEFENSE"] = [-20,2]
             engine.display("His ATTACK increases by 20 for two turns and his DEFENSE decreases by 20 for two TURNS...")
         elif meal == "STEAK FRITES":
             functions.healthincreasecheck(self,90,10)
@@ -94,9 +116,9 @@ class John:
         functions.takedamage(enemy,self,slapdamage)
 
     def greygoose(self,enemy):
-        functions.statincrease(self,"CHARISMA",5)
+        functions.statincrease(self,"CHARISMA",2)
         engine.display(f"{self.name} takes a shot of the good stuff...")
-        engine.display("His CHARISMA increases by 5,")
+        engine.display("His CHARISMA increases by 2,")
         engine.display("But he takes 5 DAMAGE in his drunken stupor.")
         functions.takedamage(self,enemy,5)
         engine.display(f"{self.name} swings blindly at {enemy.name}!")
@@ -115,9 +137,8 @@ class John:
             engine.display(f"{self.name} is joined by ALLISON GREEN!")
             engine.display(f"ALLISON GREEN will fight alongside him against {enemy.name}!...")
             self.allisongreen = True
-
         else:
-            engine.display("Don't get greedy, bozo!")
+            engine.display("Invalid choice muchacho...")
             engine.display("Lose one turn.")
 
     def extravaganttip(self,enemy):
@@ -127,7 +148,7 @@ class John:
             while True:
                 tipchoice = input("What tip do you want to leave?($): ")
                 try: 
-                    tip = int(tipchoice)
+                    int(tipchoice)
                 except ValueError:
                     print("")
                     engine.display("Tip an actual number, bozo.")
@@ -139,25 +160,47 @@ class John:
                         print("")
                         engine.display("That aint in da budget, bozo lmao. Try again.")
             john.money -= tipchoice
-            turnamount = random.randint(5,10)
+            turnamount = random.randint(6,10)
+            self.tipstatus["TIP"] = [tipchoice,turnamount]
             print("")
             engine.display(f"In {turnamount} turns, {enemy.name} will take {tipchoice} DAMAGE!")
             engine.display(f"And {self.name} will gain {tipchoice} HEALTH!")
             engine.display("But. He is exhausted from all this tipping, and loses a TURN.")
-        functions.temporarycheck(enemy)
-        enemy.combatmenu()
-        enemy.movechoice(self) 
-        time.sleep(2)
+        functions.singleturn(enemy,self)
 
     def getdividend(self):
         dividend = random.randint(1,20)
         engine.display(f"{self.name} collects ${dividend} in DIVIDENDS!")
         self.money += dividend
 
+    def tipdelivery(self,enemy):
+        for i in self.tipstatus:
+            self.tipstatus[i][1] -= 1
+            if self.tipstatus[i][1] <= 0:
+                engine.display(f"TIP delivery...")
+                engine.display(f"{self.name} rains cash all over {enemy.name}!")
+                engine.display(f"{enemy.name} is so shocked that they take {self.tipstatus[i][0]} DAMAGE!")
+                engine.display(f"And {self.name}, just for shits and giggles, GAINS {self.tipstatus[i][0]} HEALTH!")
+                functions.takedamage(enemy,self,self.tipstatus[i][0])
+                functions.healthincreasecheck(self,self.maxhealth,self.tipstatus[i][0])
+                del self.tipstatus[i]
+
+    def personalchecks(self,enemy):
+        self.getdividend()
+        self.tipdelivery(enemy)
+        if self.allisongreen == True and self.money >= 150:
+            engine.display(f"{allisongreen.name} heals {self.name} for 5 HEALTH!")
+            functions.healthincreasecheck(self,self.maxhealth,5)
+            engine.display(f"{self.name}'s HEALTH is increased to {self.health}!")
+            engine.display(f"{allisongreen.name} does 5 DAMAGE to {enemy.name}!")
+            functions.takedamage(enemy,self,5)
+            allisongreen.movechoice(enemy)
+
 john = John(
     "John",  #name
-    ["CUSTOMER SERVICE","GOURMET MEAL","GREY GOOSE","FLAME FORM","EXTRAVAGANT TIP"], #moveset
+    ["CUSTOMER SERVICE","GOURMET MEAL","GREY GOOSE","OH MY GOD JOHN","EXTRAVAGANT TIP"], #moveset
     {},      #temporarystats
+    {},       #passiveeffects
     ["GEOGRAPHY"], #subjects
     90,        #health
     90,         #maxhealth
@@ -172,16 +215,68 @@ john = John(
     8,          #guardbreak
     False,       #allisongreen
     100,        #money
+    {},         #tipstatus
     )
 
-allisongreen = genericclass.Generic(
+class AllisonGreenNPC:
+    def __init__(self,name,moveset,temporarystats,passiveeffects,subjects,health,maxhealth,attack,defense,speed,intelligence,charisma,
+                alcoholtolerance,weedtolerance,critical,guardbreak):
+        self.name = name
+        self.moveset = moveset
+        self.temporarystats = temporarystats
+        self.passiveffects = passiveeffects
+        self.subjects = subjects
+        self.health = health
+        self.maxhealth = maxhealth
+        self.attack = attack
+        self.defense = defense
+        self.speed = speed
+        self.intelligence = intelligence
+        self.charisma = charisma
+        self.alcoholtolerance = alcoholtolerance
+        self.weedtolerance = weedtolerance
+        self.critical = critical
+        self.guardbreak = guardbreak
+
+    def combatmenu(self):
+        print("-----------------------------------------------------------------")
+        print(f"{self.name} STATS:                            {self.name} MOVES:")
+        print("")
+        print(f"HEALTH: {self.health}                                   1. ATTACK")
+        print(f"ATTACK: {self.attack}                                    2. DEFEND")
+        print(f"DEFENSE: {self.defense}                                   3. CHUG BEER")
+        print(f"SPEED: {self.speed}                                     4. SMOKE WEED")
+        print(f"INTELLGENCE: {self.intelligence}                               5. STUDY")
+        print("")
+
+    def movechoice(self,enemy):
+        choice = random.choice(["1","2","3","4","5"])
+        options = {
+            "1":functions.basicattack,
+            "2":functions.basicdefend,
+            "3":functions.chugbeer,
+            "4":functions.smokeweed,
+            "5":functions.study
+        }
+        if choice == "1":
+            options[choice](john,enemy)
+        elif choice == "2" or choice == "3" or choice == "4":
+            options[choice](john)
+        else:
+            options[choice](john,john.subjects)
+
+    def personalchecks(self,enemy):
+        None
+
+allisongreen = AllisonGreenNPC(
     "Allison Green",  #name
     [], #moveset
     {},      #temporarystats
+    {},  #passiveeffects
     ["GEOGRAPHY"], #subjects
     50,        #health
     50,         #maxhealth
-    3,         #attack
+    7,         #attack
     3,          #defense
     6,          #speed
     5,          #intelligence
@@ -191,6 +286,3 @@ allisongreen = genericclass.Generic(
     8,          #critical
     8,          #guardbreak
 )
-
-john.extravaganttip(allisongreen)
-print(john.money)

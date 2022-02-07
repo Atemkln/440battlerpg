@@ -1,11 +1,12 @@
 import engine,random,functions
 
 class Titouan:
-    def __init__(self,name,moveset,temporarystats,subjects,health,maxhealth,attack,defense,speed,intelligence,charisma,
+    def __init__(self,name,moveset,temporarystats,passiveeffects,subjects,health,maxhealth,attack,defense,speed,intelligence,charisma,
                 alcoholtolerance,weedtolerance,critical,guardbreak,blunt,bluntattribute,highstate,defazzcheck,):
         self.name = name
         self.moveset = moveset
         self.temporarystats = temporarystats
+        self.passiveeffects = passiveeffects
         self.subjects = subjects
         self.health = health
         self.maxhealth = maxhealth
@@ -27,7 +28,7 @@ class Titouan:
         print("-----------------------------------------------------------------")
         print(f"{self.name} STATS:                            {self.name} MOVES:")
         print("")
-        print(f"HEALTH: {self.health}                                   1. ATTACK")
+        print(f"HEALTH: {self.health}                                    1. ATTACK")
         print(f"ATTACK: {self.attack}                                    2. DEFEND")
         print(f"DEFENSE: {self.defense}                                    3. CHUG BEER")
         print(f"SPEED: {self.speed}                                      4. SMOKE WEED")
@@ -108,7 +109,7 @@ class Titouan:
     def rollblunt(self):
         self.blunt = True
         choice = random.randint(1,10)
-        if choice <= 6:
+        if choice <= 4:
             self.bluntattribute = "SHIT"
         elif choice <= 8:
             self.bluntattribute = "MEH"
@@ -126,16 +127,19 @@ class Titouan:
                 engine.display("It's pretty SHIT...")
                 engine.display(f"Nevertheless, {self.name} is now SUPER HIGH")
                 self.highstate = "SUPER HIGH"
-                engine.display("He will take 10 less DAMAGE for the next 5 TURNS...")
+                engine.display("He will take 10 less DAMAGE for the next 5 TURNS,\nAnd his ATTACK will be increased by 10 for the next 5 TURNS")
                 functions.statincrease(self,"DEFENSE",10)
+                functions.statincrease(self,"ATTACK",10)
                 self.temporarystats["DEFENSE"] = [10,5]
+                self.temporarystats["ATTACK"] = [10,5]
             elif self.bluntattribute == "MEH":
                 engine.display("It's pretty MEH...")
                 engine.display(f"Who cares though lol, {self.name} is now HIGH AF")
                 self.highstate = "SUPER HIGHSTATE"
-                engine.display("He will take 10 less DAMAGE for the next 5 TURNS,\nAnd his ATTACK will be increased by 10 for the next 5 TURNS")
+                engine.display("He will take 10 less DAMAGE for the next 5 TURNS,\nAnd his ATTACK will be increased by 10 for the next 5 TURNS\nAnd his HEALTH increases by 10!")
                 functions.statincrease(self,"DEFENSE",10)
                 functions.statincrease(self,"ATTACK",10)
+                functions.healthincreasecheck(self,self.maxhealth,10)
                 self.temporarystats["DEFENSE"] = [10,5]
                 self.temporarystats["ATTACK"] = [10,5]
             else:
@@ -156,8 +160,9 @@ class Titouan:
 
     def freshfade(self):
         engine.display(f"{self.name} obtains the freshest of FADES!")
-        engine.display("His HEALTH increases by 5,\nAnd his CHARISMA increases by 1!")
+        engine.display("His HEALTH increases by 5,\nAnd his CHARISMA and SPEED both increase by 1!")
         functions.statincrease(self,"CHARISMA",1)
+        functions.statincrease(self,"SPEED",1)
         functions.healthincreasecheck(self,100,5)
 
     def defazz(self,enemy):
@@ -173,17 +178,36 @@ class Titouan:
             engine.display(f"You take a whopping 50 DAMAGE,\nAnd {self.name} nizes your next TURN...")
             engine.display("Wouldn't wanna be ya lmao XD")
             functions.takedamage(enemy,self,50)
-            self.defazzcheck = False
+            self.defazzcheck = "activated"
             self.combatmenu()
             self.movechoice(enemy)
+        elif self.defazzcheck == "activated":
+            engine.display(f"{self.name} catches {enemy.name} again with the nefarious DEFAZZ!")
+            choice = random.randint(1,2)
+            engine.waitresult()
+            if choice == 1:
+                engine.display(f"{enemy.name} takes a whopping 50 DAMAGE,\nAnd {self.name} nizes their next TURN...")
+                engine.display("Wouldn't wanna be ya lmao XD")
+                functions.takedamage(enemy,self,50)
+                functions.temporarycheck(self)
+                self.combatmenu()
+                self.movechoice(enemy)
+            else:
+                engine.display(f"Pure black airforce energy!")
+                engine.display(f"{enemy.name} breaks out of the cycle of the DEFAZZ")
+                self.defazzcheck = False
         else:
             engine.display("You aren't HIGH enough to do that lol")
             engine.display("Lose a turn.")
+
+    def personalchecks(self,enemy):
+        None
     
 titouan = Titouan(
     "Titouan",  #name
     ["CROSSOVER","ROLL BLUNT","SESH","FRESH FADE","DEFAZZ"], #moveset
     {},      #temporarystats
+    {},       #passiveeffects
     ["KINESIOLOGY"], #subjects
     100,        #health
     100,        #maxhealth

@@ -1,5 +1,4 @@
 import sys,time
-from typing import Any
 
 def flush_input():
     try:

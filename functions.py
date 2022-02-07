@@ -1,4 +1,4 @@
-import engine,random,sys
+import engine,random,sys,time
 
 def basicattack(player,enemy):
     critical = random.randint(1,10)
@@ -21,7 +21,7 @@ def basicdefend(player):
     defendmod = random.randint(1,10)
     statincrease(player,"DEFENSE",defendmod) 
     player.temporarystats["DEFENSE"] = [defendmod,1]
-    engine.display(f"{player.name} raises his defense by {defendmod} for 1 TURN!")
+    engine.display(f"{player.name} raises their defense by {defendmod} for 1 TURN!")
 
 def chugbeer(player):
     beerchoice = random.choice(["BUDWEISER","MOLSON","MOOSEHEAD","TSING TAO","SLEEMAN","LABATT BLUE"])
@@ -100,7 +100,7 @@ def speeddecrease(player,statdecrease):
     player.speed -= statdecrease
     if player.speed < 0:
         player.speed = 0
-
+                                    
 def charismadecrease(player,statdecrease):
     player.charisma -= statdecrease
     if player.charisma < 0:
@@ -153,11 +153,11 @@ def statdecrease(player,stat,decrease):
     else:
         weedtolerancedecrease(player,decrease)  
 
-def takedamage(player,enemy,damage):
-    player.health -= damage
-    deathcheck(enemy,player)
+def takedamage(hittee,potentialwinner,damage):
+    hittee.health -= damage
+    deathcheck(potentialwinner,hittee)
 
-def temporarycheck(player):
+def generaltemporarycheck(player):
     tobedeleted = []
     if player.temporarystats != {}:
         for i in player.temporarystats:
@@ -181,9 +181,31 @@ def temporarycheck(player):
                 player.weedtolerance -= player.temporarystats[i][0]
             elif i == "CRITICAL":
                 player.critical -= player.temporarystats[i][0]
-            elif i == "ALLISON GREEN":
-                player.allisongreen = False
             else:
                 player.guardbreak -= player.temporarystats[i][0]
             del player.temporarystats[i]
 
+def passiveeffectscheck(player1,player2):
+    tobedeleted = []
+    if player1.passiveeffects != {}:
+        for i in player1.passiveeffects:
+            player1.passiveeffects[i][0] -= 1
+            if player1.passiveeffects[i][0] <= 0:
+                tobedeleted.append(i)
+            engine.display(player1.passiveeffects[i][2])
+            if i == "DAMAGE":
+                takedamage(player1,player2,player1.passiveeffects[i][1])
+            elif i == "HEALTH":
+                healthincreasecheck(player1,player1.maxhealth,player1.passiveeffects[i][1])
+    for effect in tobedeleted:
+        del player1.passiveeffects[effect]
+
+#{"DAMAGE":[turnamount, damage/effect amount per turn, f"{self.name} takes 10 DAMAGE due to POISON!"]}
+
+def singleturn(player1,player2):
+    passiveeffectscheck(player1,player2)
+    generaltemporarycheck(player1)
+    player1.personalchecks(player2)
+    player1.combatmenu()
+    player1.movechoice(player2)
+    time.sleep(2)
