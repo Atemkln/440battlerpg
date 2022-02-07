@@ -16,7 +16,7 @@ def typeout(t, space=True):
       flush_input()
       sys.stdout.write(l)
       sys.stdout.flush()
-     # time.sleep(10.0/typing_speed)
+      time.sleep(10.0/typing_speed)
   if space:
    print("")
 
